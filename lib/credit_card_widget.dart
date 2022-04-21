@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'credit_card_background.dart';
@@ -34,6 +35,7 @@ class CreditCardWidget extends StatefulWidget {
     this.glassmorphismConfig,
     this.customCardTypeIcons = const <CustomCardTypeIcon>[],
     required this.onCreditCardWidgetChange,
+    this.showButtonCallback,
   }) : super(key: key);
 
   final String cardNumber;
@@ -50,6 +52,7 @@ class CreditCardWidget extends StatefulWidget {
   final bool isHolderNameVisible;
   final String? backgroundImage;
   final Glassmorphism? glassmorphismConfig;
+  final Future<void> Function()? showButtonCallback;
 
   final String labelCardHolder;
   final String labelExpiredDate;
@@ -64,7 +67,7 @@ class CreditCardWidget extends StatefulWidget {
 class _CreditCardWidgetState extends State<CreditCardWidget>
     with SingleTickerProviderStateMixin {
   late Gradient backgroundGradientColor;
-  late bool showCVV = !widget.obscureCardCvv;
+  late bool isShowCVV = !widget.obscureCardCvv;
   late String number = widget.obscureCardNumber
       ? widget.cardNumber.replaceAll(RegExp(r'(?<=.{0})\d(?=.{4})'), '*')
       : widget.cardNumber;
@@ -72,6 +75,8 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
   late String cvv = widget.obscureCardCvv
       ? widget.cvvCode.replaceAll(RegExp(r'\d'), '*')
       : widget.cvvCode;
+
+  bool isShowButtonLoading = false;
 
   bool isAmex = false;
 
@@ -181,22 +186,25 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
                           ),
                           primary: const Color(0xFF9CA3AF),
                         ),
-                        onPressed: () {
-                          showCVV = !showCVV;
-                          if (showCVV) {
-                            number = splitCardNumber(widget.cardNumber);
-                            cvv = widget.cvvCode;
+                        onPressed: () async {
+                          isShowButtonLoading = true;
+                          setState(() {});
+                          if (widget.showButtonCallback != null && !isShowCVV) {
+                            await widget.showButtonCallback!().then((_) {
+                              _showCVV();
+                            });
                           } else {
-                            cvv = widget.cvvCode.replaceAll(RegExp(r'\d'), '*');
-                            number = widget.cardNumber.replaceAll(
-                                RegExp(r'(?<=.{0})\d(?=.{4})'), '*');
+                            _showCVV();
                           }
+                          isShowButtonLoading = false;
                           setState(() {});
                         },
-                        child: Text(
-                          showCVV ? 'HIDE' : 'SHOW',
-                          style: widget.textStyle ?? defaultTextStyle,
-                        ),
+                        child: isShowButtonLoading
+                            ? const CupertinoActivityIndicator()
+                            : Text(
+                                isShowCVV ? 'HIDE' : 'SHOW',
+                                style: widget.textStyle ?? defaultTextStyle,
+                              ),
                       )),
                 ],
               ),
@@ -252,6 +260,18 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
         ],
       ),
     );
+  }
+
+  void _showCVV() {
+    isShowCVV = !isShowCVV;
+    if (isShowCVV) {
+      number = splitCardNumber(widget.cardNumber);
+      cvv = widget.cvvCode;
+    } else {
+      cvv = widget.cvvCode.replaceAll(RegExp(r'\d'), '*');
+      number =
+          widget.cardNumber.replaceAll(RegExp(r'(?<=.{0})\d(?=.{4})'), '*');
+    }
   }
 
   String splitCardNumber(String? cardNumber) {
