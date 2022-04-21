@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 
-import 'credit_card_model.dart';
 import 'flutter_credit_card.dart';
 
 class CreditCardForm extends StatefulWidget {
@@ -94,7 +92,6 @@ class _CreditCardFormState extends State<CreditCardForm> {
   FocusNode cardHolderNode = FocusNode();
 
   void textFieldFocusDidChange() {
-    creditCardModel.isCvvFocused = cvvFocusNode.hasFocus;
     onCreditCardModelChange(creditCardModel);
   }
 
@@ -104,8 +101,8 @@ class _CreditCardFormState extends State<CreditCardForm> {
     cardHolderName = widget.cardHolderName;
     cvvCode = widget.cvvCode;
 
-    creditCardModel = CreditCardModel(
-        cardNumber, expiryDate, cardHolderName, cvvCode, isCvvFocused);
+    creditCardModel =
+        CreditCardModel(cardNumber, expiryDate, cardHolderName, cvvCode);
   }
 
   @override
