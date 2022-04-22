@@ -35,6 +35,7 @@ class CreditCardWidget extends StatefulWidget {
     this.glassmorphismConfig,
     this.customCardTypeIcons = const <CustomCardTypeIcon>[],
     required this.onCreditCardWidgetChange,
+    this.showButtonEnabled = false,
     this.showButtonCallback,
   }) : super(key: key);
 
@@ -52,6 +53,8 @@ class CreditCardWidget extends StatefulWidget {
   final bool isHolderNameVisible;
   final String? backgroundImage;
   final Glassmorphism? glassmorphismConfig;
+
+  final bool showButtonEnabled;
   final Future<void> Function()? showButtonCallback;
 
   final String labelCardHolder;
@@ -176,36 +179,41 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
                       style: widget.textStyle ?? defaultTextStyle,
                     ),
                   ),
-                  Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(
-                            MediaQuery.of(context).size.width * 0.1,
-                            MediaQuery.of(context).size.width * 0.05,
-                          ),
-                          primary: const Color(0xFF9CA3AF),
-                        ),
-                        onPressed: () async {
-                          isShowButtonLoading = true;
-                          setState(() {});
-                          if (widget.showButtonCallback != null && !isShowCVV) {
-                            await widget.showButtonCallback!().then((_) {
-                              _showCVV();
-                            });
-                          } else {
-                            _showCVV();
-                          }
-                          isShowButtonLoading = false;
-                          setState(() {});
-                        },
-                        child: isShowButtonLoading
-                            ? const CupertinoActivityIndicator()
-                            : Text(
-                                isShowCVV ? 'HIDE' : 'SHOW',
-                                style: widget.textStyle ?? defaultTextStyle,
+                  widget.showButtonEnabled
+                      ? Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(
+                                MediaQuery.of(context).size.width * 0.1,
+                                MediaQuery.of(context).size.width * 0.05,
                               ),
-                      )),
+                              primary: const Color(0xFF9CA3AF),
+                            ),
+                            onPressed: () async {
+                              setState(() {
+                                isShowButtonLoading = true;
+                              });
+                              if (widget.showButtonCallback != null &&
+                                  !isShowCVV) {
+                                await widget.showButtonCallback!().then((_) {
+                                  _showCVV();
+                                });
+                              } else {
+                                _showCVV();
+                              }
+                              setState(() {
+                                isShowButtonLoading = false;
+                              });
+                            },
+                            child: isShowButtonLoading
+                                ? const CupertinoActivityIndicator()
+                                : Text(
+                                    isShowCVV ? 'HIDE' : 'SHOW',
+                                    style: widget.textStyle ?? defaultTextStyle,
+                                  ),
+                          ))
+                      : const SizedBox(),
                 ],
               ),
             ),

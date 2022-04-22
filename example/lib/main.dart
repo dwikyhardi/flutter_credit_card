@@ -81,6 +81,7 @@ class MySampleState extends State<MySample> {
                       ),
                     ),
                   ],
+                  showButtonEnabled: true,
                   showButtonCallback: () async {
                     await Future<void>.delayed(const Duration(seconds: 2),() {
                       print('2 detik telah berlalu');
